@@ -1,0 +1,17 @@
+{
+  "name": "event-driven-webcomponents-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./bin/index.js",
+  "scripts": {
+    "create": "./bin/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "fs-extra": "^11.3.0",
+    "prompts": "^2.4.2"
+  }
+}
