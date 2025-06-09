@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "./bin/index.js",
+  "bin": {
+    "event-driven-webcomponents-cli": "./bin/index.js"
+  },
   "scripts": {
     "create": "./bin/index.js"
   },
