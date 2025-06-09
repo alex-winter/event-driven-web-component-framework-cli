@@ -9,11 +9,10 @@ import { promisify } from 'util'
 
 const execAsync = promisify(exec)
 
-// Resolve __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-async function installDependencies(targetDir) {
+async function installDependencies(targetDir: string) {
     try {
         const { stdout, stderr } = await execAsync('npm install serve open', { cwd: targetDir })
         console.log(stdout)
@@ -23,7 +22,19 @@ async function installDependencies(targetDir) {
     }
 }
 
-async function serveAndOpen(targetDir) {
+async function buildProject(targetDir: string) {
+    console.log(`🔧 Building project with Webpack...`)
+    try {
+        const { stdout, stderr } = await execAsync('npx webpack', { cwd: targetDir })
+        console.log(stdout)
+        if (stderr) console.error(stderr)
+    } catch (error) {
+        console.error('❌ Webpack build failed:', error)
+        process.exit(1)
+    }
+}
+
+async function serveAndOpen(targetDir: string) {
     const port = 3000
     const serveProcess = exec(`npx serve public -l ${port}`, { cwd: targetDir })
 
@@ -34,7 +45,6 @@ async function serveAndOpen(targetDir) {
         process.stderr.write(data)
     })
 
-    // Give the server time to start
     setTimeout(() => {
         exec(`npx open http://localhost:${port}`)
     }, 2000)
@@ -64,13 +74,12 @@ async function main() {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ooo</title>
     <script src="./dist/index.js"></script>
 </head>
-<body>
-</body>
+<body></body>
 </html>
     `.trim())
 
@@ -99,7 +108,7 @@ export abstract class Component extends BaseComponent {
 }
     `.trim())
 
-    await fs.outputFile(path.join(targetDir, 'src', 'Components', `App.ts`), `
+    await fs.outputFile(path.join(targetDir, 'src', 'Components', 'App.ts'), `
 import { Component } from 'Component'
 
 export class App extends Component {
@@ -148,7 +157,7 @@ export class App extends Component {
 }
     `.trim())
 
-    await fs.outputFile(path.join(targetDir, 'src', `config.ts`), `
+    await fs.outputFile(path.join(targetDir, 'src', 'config.ts'), `
 import { App } from 'Components/App'
 
 export const COMPONENTS = new Map<CustomElementConstructor, string>([
@@ -156,30 +165,28 @@ export const COMPONENTS = new Map<CustomElementConstructor, string>([
 ])
     `.trim())
 
-    await fs.outputFile(path.join(targetDir, 'src', `index.ts`), `
+    await fs.outputFile(path.join(targetDir, 'src', 'index.ts'), `
 import { COMPONENTS } from 'config'
 
 for (const [constructor, tag] of COMPONENTS) {
     customElements.define(tag, constructor)
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    document.body.append(
-        document.createElement('app-root')
-    )
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.append(document.createElement('app-root'))
 })
     `.trim())
 
-    await fs.outputFile(path.join(targetDir, `README.md`), `# ${projectName}`)
+    await fs.outputFile(path.join(targetDir, 'README.md'), `# ${projectName}`)
 
-    await fs.outputFile(path.join(targetDir, `.gitignore`), `
+    await fs.outputFile(path.join(targetDir, '.gitignore'), `
 node_modules
 public/dist/*
     `.trim())
 
-    await fs.outputFile(path.join(targetDir, `webpack.config.js`), `
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    await fs.outputFile(path.join(targetDir, 'webpack.config.js'), `
+const path = require('path')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
     mode: 'development',
@@ -189,7 +196,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /\\.tsx?$/,
                 use: [
                     {
                         loader: 'ts-loader',
@@ -201,7 +208,7 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {
-                test: /\.css$/,
+                test: /\\.css$/,
                 use: [
                     MiniCssExtractPlugin.loader,
                     'css-loader'
@@ -210,10 +217,7 @@ module.exports = {
         ],
     },
     resolve: {
-        modules: [
-            path.resolve(__dirname, 'src'),
-            'node_modules',
-        ],
+        modules: [path.resolve(__dirname, 'src'), 'node_modules'],
         extensions: ['.tsx', '.ts', '.js', '.css'],
     },
     output: {
@@ -228,10 +232,10 @@ module.exports = {
             filename: '[name].css',
         }),
     ],
-};
+}
     `.trim())
 
-    await fs.outputFile(path.join(targetDir, `package.json`), JSON.stringify({
+    await fs.outputFile(path.join(targetDir, 'package.json'), JSON.stringify({
         name: projectName,
         scripts: {
             watch: "webpack --watch"
@@ -264,30 +268,28 @@ module.exports = {
         }
     }, null, 2))
 
-    await fs.outputFile(path.join(targetDir, `tsconfig.json`), JSON.stringify({
-        "compilerOptions": {
-            "experimentalDecorators": true,
-            "emitDecoratorMetadata": true,
-            "target": "esnext",
-            "module": "commonjs",
-            "outDir": "./public/dist",
-            "baseUrl": "src",
-            "sourceMap": true,
-            "strict": true,
-            "lib": ["dom", "es6"],
-            "esModuleInterop": true,
-            "skipLibCheck": true,
-            "forceConsistentCasingInFileNames": true
+    await fs.outputFile(path.join(targetDir, 'tsconfig.json'), JSON.stringify({
+        compilerOptions: {
+            experimentalDecorators: true,
+            emitDecoratorMetadata: true,
+            target: "esnext",
+            module: "commonjs",
+            outDir: "./public/dist",
+            baseUrl: "src",
+            sourceMap: true,
+            strict: true,
+            lib: ["dom", "es6"],
+            esModuleInterop: true,
+            skipLibCheck: true,
+            forceConsistentCasingInFileNames: true
         },
-        "include": ["src/**/*"],
-        "exclude": ["node_modules"]
+        include: ["src/**/*"],
+        exclude: ["node_modules"]
     }, null, 2))
 
     await installDependencies(targetDir)
-    console.log(`✅ Dependencies installed.`)
-
+    await buildProject(targetDir)
     await serveAndOpen(targetDir)
-    console.log(`🚀 App served at http://localhost:3000`)
 }
 
 main()
