@@ -12,7 +12,7 @@ const execAsync = promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-async function installDependencies(targetDir: string) {
+async function installDependencies(targetDir) {
     try {
         const { stdout, stderr } = await execAsync('npm install serve open', { cwd: targetDir })
         console.log(stdout)
@@ -22,7 +22,7 @@ async function installDependencies(targetDir: string) {
     }
 }
 
-async function buildProject(targetDir: string) {
+async function buildProject(targetDir) {
     console.log(`🔧 Building project with Webpack...`)
     try {
         const { stdout, stderr } = await execAsync('npx webpack', { cwd: targetDir })
@@ -34,7 +34,7 @@ async function buildProject(targetDir: string) {
     }
 }
 
-async function serveAndOpen(targetDir: string) {
+async function serveAndOpen(targetDir) {
     const port = 3000
     const serveProcess = exec(`npx serve public -l ${port}`, { cwd: targetDir })
 
