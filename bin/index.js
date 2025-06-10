@@ -6,6 +6,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { exec } from 'child_process'
 import { promisify } from 'util'
+import { makeComponent } from './files/component.js'
 
 const execAsync = promisify(exec)
 
@@ -51,11 +52,33 @@ async function serveAndOpen(targetDir) {
 }
 
 async function main() {
+    const args = process.argv.slice(2)
+
+    if (args.length >= 2 && args[0] === 'new' && args[1] === 'component') {
+        const isVerbose = args[2] === 'verbose'
+        const cwd = process.cwd()
+
+        const response = await prompts({
+            type: 'text',
+            name: 'name',
+            message: '🛠  component class name',
+            initial: 'ExampleComponent',
+        })
+        const componentClassName = response.name
+        const targetDir = path.join(cwd)
+
+        await fs.outputFile(
+            path.join(targetDir, 'src', 'Components', componentClassName, `${componentClassName}.ts`),
+            makeComponent(componentClassName, isVerbose)
+        )
+        process.exit(0)
+    }
+
     const response = await prompts({
         type: 'text',
         name: 'name',
         message: '🛠  What is your project called?',
-        initial: 'my-web-component'
+        initial: 'Cool Project Name'
     })
 
     const projectName = response.name
